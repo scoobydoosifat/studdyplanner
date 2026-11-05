@@ -10,5 +10,6 @@ services:
       - key: MONGODB_DATABASE
         value: mahin_porte_bosh
       - key: ALLOWED_ORIGINS
-        sync: false
-
+        value: https://mahinportebosh.vercel.app,http://localhost:5173
+      - key: FRONTEND_URL
+        value: https://mahinportebosh.vercel.app
