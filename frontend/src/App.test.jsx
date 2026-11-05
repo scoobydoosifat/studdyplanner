@@ -313,12 +313,19 @@ describe('MahinPorteBosh dashboard', () => {
     expect(screen.getByRole('button', { name: 'Switch to light mode' })).toBeInTheDocument()
   })
 
-  it('moves the study cat when approached', async () => {
+  it('moves the Ronaldo mascot and celebrates after repeated clicks', async () => {
     mockBackend()
+    const user = userEvent.setup()
     render(<App />)
-    const cat = screen.getByRole('button', { name: /Mochi the study cat/i })
-    expect(cat.style.getPropertyValue('--cat-x')).toContain('100vw')
-    fireEvent.pointerEnter(cat)
-    expect(cat.style.getPropertyValue('--cat-x')).toBe('24px')
+    const player = screen.getByRole('button', { name: /Cristiano Ronaldo mascot/i })
+    expect(player.style.getPropertyValue('--player-x')).toContain('100vw')
+    fireEvent.pointerEnter(player)
+    expect(player.style.getPropertyValue('--player-x')).toBe('24px')
+
+    await user.click(player)
+    await user.click(player)
+    await user.click(player)
+    await user.click(player)
+    expect(screen.getByText('SIUUUUU!')).toBeInTheDocument()
   })
 })

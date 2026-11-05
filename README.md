@@ -9,7 +9,7 @@ A calm, personal study planner made for Mahin. It uses a React/Vite frontend, a 
 - Create, read, edit, complete/uncomplete, and delete study tasks
 - English, Bangla, and General Knowledge study cards with date, time, duration, priority, and optional notes
 - Weekly and monthly progress summaries, focus time, completion rate, and streaks
-- Warm light/dark themes, animated cards, responsive navigation, and a playful interactive study cat
+- Warm light/dark themes, animated cards, responsive navigation, and an interactive Cristiano Ronaldo mascot with a “SIUUUUU!” celebration
 - Rotating motivational quotes and animated inspiration content
 - A branded full-screen loader for every CRUD action
 - Confirmation before permanent deletion

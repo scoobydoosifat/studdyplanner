@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowRight, BookOpen, CalendarDays, ChevronLeft, ChevronRight, Clock3,
   Feather, Flame, Heart, Lightbulb, Moon, Plus, Sparkles, Sun, Target, X,
@@ -53,20 +53,40 @@ function SiteHeader({ page, onNavigate, theme, onToggleTheme }) {
   </header>
 }
 
-function StudyCat() {
+function RonaldoMascot() {
   const spots = [
     { x: 'calc(100vw - 116px)', y: 'calc(100vh - 112px)', flip: 1 }, { x: '24px', y: 'calc(100vh - 112px)', flip: -1 },
     { x: 'calc(100vw - 126px)', y: '24vh', flip: 1 }, { x: '34px', y: '38vh', flip: -1 },
     { x: 'calc(50vw - 44px)', y: 'calc(100vh - 108px)', flip: 1 },
   ]
   const [spot, setSpot] = useState(0)
+  const [clicks, setClicks] = useState(0)
+  const [celebrating, setCelebrating] = useState(false)
+  const target = useRef(Math.random() < .5 ? 3 : 4)
+  const celebrationTimer = useRef(null)
+
+  useEffect(() => () => window.clearTimeout(celebrationTimer.current), [])
+
   const move = () => setSpot(value => (value + 1) % spots.length)
+  const handleClick = () => {
+    move()
+    const nextClicks = clicks + 1
+    if (nextClicks < target.current) {
+      setClicks(nextClicks)
+      return
+    }
+
+    setClicks(0)
+    target.current = Math.random() < .5 ? 3 : 4
+    setCelebrating(true)
+    window.clearTimeout(celebrationTimer.current)
+    celebrationTimer.current = window.setTimeout(() => setCelebrating(false), 1800)
+  }
+
   const position = spots[spot]
-  return <button className="study-cat" type="button" aria-label="Mochi the study cat — hover to make Mochi run" onPointerEnter={move} onFocus={move} style={{ '--cat-x': position.x, '--cat-y': position.y, '--cat-flip': position.flip }}>
-    <span className="cat-speech">catch me!</span>
-    <svg viewBox="0 0 120 92" role="img" aria-label="A cheerful cat carrying a pencil">
-      <path className="cat-tail" d="M95 62c22 1 22-25 9-27-9-2-12 8-7 13" /><path className="cat-body" d="M35 48c-8 5-12 16-8 26 5 13 19 15 37 14 22-1 35-7 34-22-1-12-9-20-21-22z" /><path className="cat-head" d="M31 22l8 7c6-4 22-4 29 0l9-8 2 22c2 19-9 27-27 27S25 60 28 43z" /><path className="cat-inner" d="M34 27l5 5-7 5zm39 0l-4 6 7 4z" /><circle cx="43" cy="45" r="2.5" /><circle cx="64" cy="45" r="2.5" /><path className="cat-face" d="M52 49l3 2 3-2m-3 2v4m0 0c-3 3-6 2-8 0m8 0c3 3 6 2 8 0" /><path className="cat-paw" d="M38 70c-1 9 5 13 11 7m26-8c2 9-2 13-9 9" /><g className="cat-pencil"><path d="M20 71L82 33" /><path d="M82 33l9-2-5 8z" /></g>
-    </svg>
+  return <button className={`ronaldo-mascot${celebrating ? ' celebrating' : ''}`} type="button" aria-label="Cristiano Ronaldo mascot — click to make him run" onPointerEnter={move} onClick={handleClick} style={{ '--player-x': position.x, '--player-y': position.y, '--player-flip': position.flip }}>
+    <span className="player-speech" role="status" aria-live="polite">{celebrating ? 'SIUUUUU!' : 'Catch me!'}</span>
+    <img src="/assets/ronaldo-mascot.png" alt="" draggable="false" />
   </button>
 }
 
@@ -148,7 +168,7 @@ export default function App() {
       {page === 'progress' && <ProgressPage summary={summary} summaryMode={summaryMode} setSummaryMode={setSummaryMode} />}
       {page === 'inspiration' && <InspirationPage onStart={() => navigate('planner')} />}
     </div>
-    <footer className="site-footer"><Logo compact /><p>Made gently for Mahin · one thoughtful card at a time.</p><span>November — December 2026</span></footer><StudyCat />
+    <footer className="site-footer"><Logo compact /><p>Made gently for Mahin · one thoughtful card at a time.</p><span>November — December 2026</span></footer><RonaldoMascot />
     {deck && <FlashCardDeck task={deck} onClose={() => setDeck(null)} onSave={saveTask} />}{deleteTask && <DeleteDialog task={deleteTask} onClose={() => setDeleteTask(null)} onConfirm={removeTask} />}
   </div>
 }
