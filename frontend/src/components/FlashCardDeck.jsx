@@ -33,7 +33,7 @@ const STEP_COPY = [
   },
 ]
 
-const SUBJECTS = ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'Bangla', 'ICT']
+const SUBJECTS = ['English', 'Bangla', 'General Knowledge']
 
 const DURATIONS = [
   { value: 25, label: '25 minutes' },
@@ -186,14 +186,15 @@ export default function FlashCardDeck({ task, onClose, onSave }) {
 
                     <label className="deck-field" htmlFor="card-subject">
                       <span>Subject</span>
-                      <input
+                      <select
                         id="card-subject"
                         name="subject"
-                        value={form.subject}
-                        maxLength={50}
-                        placeholder="Mathematics"
+                        value={SUBJECTS.includes(form.subject) ? form.subject : ''}
                         onChange={event => update('subject', event.target.value)}
-                      />
+                      >
+                        <option value="" disabled>Choose a subject</option>
+                        {SUBJECTS.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+                      </select>
                     </label>
                     <div className="subject-chips" role="group" aria-label="Subject shortcuts">
                       {SUBJECTS.map(subject => (

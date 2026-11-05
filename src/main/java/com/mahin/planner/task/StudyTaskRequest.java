@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
@@ -16,6 +17,8 @@ public record StudyTaskRequest(
 
         @NotBlank(message = "Choose or enter a subject")
         @Size(max = 50, message = "Subject must be 50 characters or fewer")
+        @Pattern(regexp = "\\s*(English|Bangla|General Knowledge)\\s*",
+                message = "Subject must be English, Bangla, or General Knowledge")
         String subject,
 
         @NotNull(message = "Choose a study date")
@@ -36,4 +39,3 @@ public record StudyTaskRequest(
         String notes
 ) {
 }
-

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import TaskCard from './TaskCard.jsx'
 
 const baseTask = {
-  id: 'task-1', title: 'Practice algebra', subject: 'Mathematics', date: '2026-11-05',
+  id: 'task-1', title: 'Practice vocabulary', subject: 'English', date: '2026-11-05',
   startTime: '18:00:00', durationMinutes: 45, priority: 'HIGH', notes: 'Chapter 3', completed: false,
 }
 
@@ -18,8 +18,8 @@ const renderCard = (overrides = {}) => {
 describe('TaskCard', () => {
   it('shows the card details', () => {
     renderCard()
-    expect(screen.getByRole('heading', { name: 'Practice algebra' })).toBeInTheDocument()
-    expect(screen.getByText('Mathematics')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Practice vocabulary' })).toBeInTheDocument()
+    expect(screen.getByText('English')).toBeInTheDocument()
     expect(screen.getByText('high')).toBeInTheDocument()
     expect(screen.getByText('Chapter 3')).toBeInTheDocument()
     expect(screen.getByText(/6:00 PM/)).toBeInTheDocument()

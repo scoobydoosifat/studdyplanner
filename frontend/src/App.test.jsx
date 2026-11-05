@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App.jsx'
 import { plannerNow, summaryRange } from './lib/dates'
@@ -7,7 +7,7 @@ import { plannerNow, summaryRange } from './lib/dates'
 const { date: today, month: plannerMonth } = plannerNow()
 
 const baseTask = {
-  id: 'task-1', title: 'Practice algebra', subject: 'Mathematics', date: today,
+  id: 'task-1', title: 'Practice vocabulary', subject: 'English', date: today,
   startTime: '18:00:00', durationMinutes: 45, priority: 'HIGH', notes: 'Chapter 3', completed: false,
 }
 
@@ -70,9 +70,15 @@ const deckStep = async (user, times = 1) => {
   }
 }
 
+const enterPlanner = async user => {
+  await user.click(screen.getByRole('button', { name: 'Planner' }))
+}
+
 describe('MahinPorteBosh dashboard', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    localStorage.clear()
+    window.history.replaceState(null, '', '#/home')
   })
 
   it('shows the deck loader, then today’s cards and summary', async () => {
@@ -84,13 +90,16 @@ describe('MahinPorteBosh dashboard', () => {
 
     render(<App />)
 
-    expect(screen.getByText('Arranging your cards…')).toBeInTheDocument()
+    expect(screen.getByText('Gathering your study cards…')).toBeInTheDocument()
     release()
 
-    expect(await screen.findByText('Practice algebra')).toBeInTheDocument()
-    expect(screen.queryByText('Arranging your cards…')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /make room for/i })).toBeInTheDocument()
+    expect(screen.queryByText('Gathering your study cards…')).not.toBeInTheDocument()
+    const user = userEvent.setup()
+    await enterPlanner(user)
+    expect(await screen.findByText('Practice vocabulary')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Progress' }))
     expect(screen.getByText('4 days')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /small cards/i })).toBeInTheDocument()
   })
 
   it('creates a task through the four flashcard steps', async () => {
@@ -98,11 +107,12 @@ describe('MahinPorteBosh dashboard', () => {
     const user = userEvent.setup()
     render(<App />)
 
+    await enterPlanner(user)
     await screen.findByText('This card is blank')
-    await user.click(screen.getByRole('button', { name: 'Draw a new card' }))
+    await user.click(screen.getByRole('button', { name: 'Draw a card' }))
 
     await user.type(screen.getByLabelText('What will you focus on?'), 'Friction notes')
-    await user.click(screen.getByRole('button', { name: 'Mathematics' }))
+    await user.click(screen.getByRole('button', { name: 'English' }))
     await deckStep(user, 2)
 
     await user.click(screen.getByRole('radio', { name: '1.5 hours' }))
@@ -117,7 +127,7 @@ describe('MahinPorteBosh dashboard', () => {
     const [, postCall] = global.fetch.mock.calls.find(([, options]) => options?.method === 'POST')
     expect(JSON.parse(postCall.body)).toEqual({
       title: 'Friction notes',
-      subject: 'Mathematics',
+      subject: 'English',
       date: today,
       startTime: '18:00',
       durationMinutes: 90,
@@ -126,7 +136,7 @@ describe('MahinPorteBosh dashboard', () => {
     })
 
     expect(await screen.findByText('Friction notes')).toBeInTheDocument()
-    expect(screen.getByText('New card dealt into your deck.')).toBeInTheDocument()
+    expect(screen.getByText('Your new study card is ready.')).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
@@ -135,12 +145,13 @@ describe('MahinPorteBosh dashboard', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await screen.findByText('Practice algebra')
+    await enterPlanner(user)
+    await screen.findByText('Practice vocabulary')
 
     await user.click(screen.getByRole('button', { name: 'Mark task done' }))
     await waitFor(() => expect(getTasks()[0].completed).toBe(true))
     expect(await screen.findByRole('button', { name: 'Mark task pending' })).toBeInTheDocument()
-    expect(screen.getByText('Beautiful — one more card flipped.')).toBeInTheDocument()
+    expect(screen.getByText('Lovely work — one gentle goal complete.')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Mark task pending' }))
     await waitFor(() => expect(getTasks()[0].completed).toBe(false))
@@ -151,7 +162,8 @@ describe('MahinPorteBosh dashboard', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await screen.findByText('Practice algebra')
+    await enterPlanner(user)
+    await screen.findByText('Practice vocabulary')
 
     await user.click(screen.getByRole('button', { name: 'Card actions' }))
     await user.click(screen.getByRole('menuitem', { name: /edit card/i }))
@@ -166,7 +178,7 @@ describe('MahinPorteBosh dashboard', () => {
 
     expect(await screen.findByText('Master algebra')).toBeInTheDocument()
     expect(getTasks()[0].title).toBe('Master algebra')
-    expect(screen.getByText('Card updated — sharper already.')).toBeInTheDocument()
+    expect(screen.getByText('Your card is beautifully updated.')).toBeInTheDocument()
   })
 
   it('requires confirmation, shows a loader and deletes the card', async () => {
@@ -186,36 +198,38 @@ describe('MahinPorteBosh dashboard', () => {
 
     const user = userEvent.setup()
     render(<App />)
-    await screen.findByText('Practice algebra')
+    await enterPlanner(user)
+    await screen.findByText('Practice vocabulary')
 
     await user.click(screen.getByRole('button', { name: 'Card actions' }))
     await user.click(screen.getByRole('menuitem', { name: /remove/i }))
 
     const dialog = screen.getByRole('alertdialog')
     expect(within(dialog).getByText('Remove this card?')).toBeInTheDocument()
-    expect(within(dialog).getByText(/Practice algebra/)).toBeInTheDocument()
+    expect(within(dialog).getByText(/Practice vocabulary/)).toBeInTheDocument()
 
     await user.click(within(dialog).getByRole('button', { name: /yes, remove/i }))
-    expect(screen.getByText('Removing the card…')).toBeInTheDocument()
+    expect(screen.getByText('Tidying up your planner…')).toBeInTheDocument()
 
     releaseDelete()
 
     expect(await screen.findByText('This card is blank')).toBeInTheDocument()
-    expect(screen.getByText('Card removed from your deck.')).toBeInTheDocument()
+    expect(screen.getByText('The card has been removed.')).toBeInTheDocument()
   })
 
   it('keeps the card when deletion is cancelled', async () => {
     mockBackend()
     const user = userEvent.setup()
     render(<App />)
-    await screen.findByText('Practice algebra')
+    await enterPlanner(user)
+    await screen.findByText('Practice vocabulary')
 
     await user.click(screen.getByRole('button', { name: 'Card actions' }))
     await user.click(screen.getByRole('menuitem', { name: /remove/i }))
     await user.click(screen.getByRole('button', { name: 'Keep it' }))
 
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
-    expect(screen.getByText('Practice algebra')).toBeInTheDocument()
+    expect(screen.getByText('Practice vocabulary')).toBeInTheDocument()
   })
 
   it('surfaces a backend error without losing the page', async () => {
@@ -228,7 +242,7 @@ describe('MahinPorteBosh dashboard', () => {
     render(<App />)
 
     expect(await screen.findByText(/Is the backend running\?/)).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /small cards/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /make room for/i })).toBeInTheDocument()
   })
 
   it('switches months inside the planner window', async () => {
@@ -237,6 +251,7 @@ describe('MahinPorteBosh dashboard', () => {
     render(<App />)
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalled())
+    await enterPlanner(user)
 
     if (plannerMonth === 10) {
       expect(await screen.findByRole('heading', { name: 'November 2026' })).toBeInTheDocument()
@@ -259,7 +274,8 @@ describe('MahinPorteBosh dashboard', () => {
     mockBackend()
     const user = userEvent.setup()
     render(<App />)
-    await screen.findByText('Practice algebra')
+    await screen.findByRole('heading', { name: /make room for/i })
+    await user.click(screen.getByRole('button', { name: 'Progress' }))
 
     const monthRange = summaryRange(today, 'month')
     await user.click(screen.getByRole('button', { name: 'Month' }))
@@ -270,5 +286,39 @@ describe('MahinPorteBosh dashboard', () => {
       )),
     ).toBe(true))
     expect(screen.getByRole('button', { name: 'Month' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('navigates between the landing, planner, progress and inspiration pages', async () => {
+    mockBackend()
+    const user = userEvent.setup()
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: /make room for/i })).toBeInTheDocument()
+    await enterPlanner(user)
+    expect(screen.getByRole('heading', { name: /gentle plan/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Progress' }))
+    expect(screen.getByRole('heading', { name: /progress, not/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Inspiration' }))
+    expect(screen.getByRole('heading', { name: /words for the days/i })).toBeInTheDocument()
+  })
+
+  it('persists dark mode preference', async () => {
+    mockBackend()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: 'Switch to dark mode' }))
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark')
+    expect(localStorage.getItem('mahin-theme')).toBe('dark')
+    expect(screen.getByRole('button', { name: 'Switch to light mode' })).toBeInTheDocument()
+  })
+
+  it('moves the study cat when approached', async () => {
+    mockBackend()
+    render(<App />)
+    const cat = screen.getByRole('button', { name: /Mochi the study cat/i })
+    expect(cat.style.getPropertyValue('--cat-x')).toContain('100vw')
+    fireEvent.pointerEnter(cat)
+    expect(cat.style.getPropertyValue('--cat-x')).toBe('24px')
   })
 })

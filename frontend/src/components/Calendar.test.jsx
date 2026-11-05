@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import Calendar from './Calendar.jsx'
 
 const task = (date, completed) => ({
-  id: `${date}-${completed}`, title: 'Task', subject: 'Math', date,
+  id: `${date}-${completed}`, title: 'Task', subject: 'Bangla', date,
   startTime: '18:00:00', durationMinutes: 45, priority: 'HIGH', completed,
 })
 

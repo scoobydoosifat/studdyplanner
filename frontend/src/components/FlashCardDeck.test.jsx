@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import FlashCardDeck from './FlashCardDeck.jsx'
 
 const existingTask = {
-  id: 'task-1', title: 'Practice algebra', subject: 'Mathematics', date: '2026-11-05',
+  id: 'task-1', title: 'Practice grammar', subject: 'English', date: '2026-11-05',
   startTime: '18:00:00', durationMinutes: 45, priority: 'HIGH', notes: 'Chapter 3', completed: false,
 }
 
@@ -34,9 +34,9 @@ describe('FlashCardDeck', () => {
     await user.type(screen.getByLabelText('What will you focus on?'), 'Revise optics')
     expect(screen.getByRole('button', { name: /continue/i })).toBeDisabled()
 
-    await user.click(screen.getByRole('button', { name: 'Physics' }))
+    await user.click(screen.getByRole('button', { name: 'English' }))
 
-    expect(screen.getByLabelText('Subject')).toHaveValue('Physics')
+    expect(screen.getByLabelText('Subject')).toHaveValue('English')
     expect(screen.getByRole('button', { name: /continue/i })).toBeEnabled()
     expect(screen.queryByText('Add a title and subject to continue')).not.toBeInTheDocument()
   })
@@ -46,7 +46,7 @@ describe('FlashCardDeck', () => {
     const { onSave } = setup()
 
     await user.type(screen.getByLabelText('What will you focus on?'), '  Revise optics  ')
-    await user.type(screen.getByLabelText('Subject'), 'Physics')
+    await user.selectOptions(screen.getByLabelText('Subject'), 'English')
     await advance(user)
 
     expect(screen.getByRole('heading', { name: 'When will you sit down?' })).toBeInTheDocument()
@@ -63,7 +63,7 @@ describe('FlashCardDeck', () => {
 
     expect(onSave).toHaveBeenCalledWith({
       title: 'Revise optics',
-      subject: 'Physics',
+      subject: 'English',
       date: '2026-11-05',
       startTime: '18:00',
       durationMinutes: 60,
@@ -77,19 +77,19 @@ describe('FlashCardDeck', () => {
     const { container } = setup()
 
     await user.type(screen.getByLabelText('What will you focus on?'), 'Revise optics')
-    await user.click(screen.getByRole('button', { name: 'Physics' }))
+    await user.click(screen.getByRole('button', { name: 'English' }))
     await advance(user)
     await user.click(screen.getByRole('button', { name: 'Back' }))
 
     expect(screen.getByLabelText('What will you focus on?')).toHaveValue('Revise optics')
-    expect(screen.getByLabelText('Subject')).toHaveValue('Physics')
+    expect(screen.getByLabelText('Subject')).toHaveValue('English')
     expect(container.querySelector('.deck-card')).toHaveClass('back')
   })
 
   it('constrains the date field to the planner window', () => {
     setup()
     const user = userEvent.setup()
-    return user.click(screen.getByRole('button', { name: 'Physics' }))
+    return user.click(screen.getByRole('button', { name: 'English' }))
       .then(() => user.type(screen.getByLabelText('What will you focus on?'), 'Optics'))
       .then(() => advance(user))
       .then(() => {
@@ -105,7 +105,7 @@ describe('FlashCardDeck', () => {
     const { container } = setup()
 
     await user.type(screen.getByLabelText('What will you focus on?'), 'Revise optics')
-    await user.click(screen.getByRole('button', { name: 'Physics' }))
+    await user.click(screen.getByRole('button', { name: 'English' }))
     await advance(user)
     await advance(user)
     await advance(user)
@@ -126,8 +126,8 @@ describe('FlashCardDeck', () => {
     const { onSave } = setup(existingTask)
 
     expect(screen.getByText('Edit focus card')).toBeInTheDocument()
-    expect(screen.getByLabelText('What will you focus on?')).toHaveValue('Practice algebra')
-    expect(screen.getByLabelText('Subject')).toHaveValue('Mathematics')
+    expect(screen.getByLabelText('What will you focus on?')).toHaveValue('Practice grammar')
+    expect(screen.getByLabelText('Subject')).toHaveValue('English')
 
     await advance(user)
     expect(screen.getByLabelText('Study date')).toHaveValue('2026-11-05')
@@ -139,8 +139,8 @@ describe('FlashCardDeck', () => {
     await user.click(screen.getByRole('button', { name: /save changes/i }))
 
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
-      title: 'Practice algebra',
-      subject: 'Mathematics',
+      title: 'Practice grammar',
+      subject: 'English',
       startTime: '18:00',
       priority: 'HIGH',
       notes: 'Chapter 3',
@@ -152,7 +152,7 @@ describe('FlashCardDeck', () => {
     const { onSave } = setup()
 
     await user.type(screen.getByLabelText('What will you focus on?'), 'Read poetry')
-    await user.type(screen.getByLabelText('Subject'), 'English')
+    await user.selectOptions(screen.getByLabelText('Subject'), 'English')
     await advance(user)
     await advance(user)
     await advance(user)
@@ -180,7 +180,7 @@ describe('FlashCardDeck', () => {
     setup()
 
     await user.type(screen.getByLabelText('What will you focus on?'), 'Read poetry')
-    await user.type(screen.getByLabelText('Subject'), 'English')
+    await user.selectOptions(screen.getByLabelText('Subject'), 'English')
 
     await advance(user)
     expect(screen.getByText('Step 2 of 4')).toBeInTheDocument()

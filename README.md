@@ -4,11 +4,13 @@ A calm, personal study planner made for Mahin. It uses a React/Vite frontend, a 
 
 ## What it includes
 
+- Animated landing page with dedicated Planner, Progress, and Inspiration views
 - November and December 2026 calendar with task counts and completion states
 - Create, read, edit, complete/uncomplete, and delete study tasks
-- Subject, date, time, duration, priority, and optional notes for every task
+- English, Bangla, and General Knowledge study cards with date, time, duration, priority, and optional notes
 - Weekly and monthly progress summaries, focus time, completion rate, and streaks
-- Animated cards, responsive mobile layout, empty/error/success states
+- Warm light/dark themes, animated cards, responsive navigation, and a playful interactive study cat
+- Rotating motivational quotes and animated inspiration content
 - A branded full-screen loader for every CRUD action
 - Confirmation before permanent deletion
 - Backend service unit tests and frontend interaction tests
@@ -93,6 +95,4 @@ npm run build
 
 ## Security note
 
-The local fallback URI is included to make IntelliJ setup straightforward. Rotate that Atlas password before sharing the repository publicly, and prefer `MONGODB_URI` as a Render secret in production. The Render environment variable overrides the local fallback.
-
-The Atlas password shared during development should be rotated because it appeared in a conversation. Keep the replacement only in local `.env` files and hosting secrets; `.env` is ignored by Git.
+The checked-in fallback connects to a local MongoDB instance and contains no credentials. For MongoDB Atlas or Render, put the complete connection string in the ignored local `.env` file or the hosting provider's `MONGODB_URI` secret. Never commit production credentials.
